@@ -21,17 +21,15 @@ io.on('connection', function(socket) {
 
   // 클라이언트로부터의 메시지가 수신되면
   socket.on('chat', function(data) {
-    console.log('Message from %s: %s', socket.name, data.msg);
 
-    var msg = {
-      from: {
-        name: socket.name,
-        userid: socket.userid
+    var chatInfo = {
+      userInfo: {
+        name: socket.name
       },
       msg: data.msg
     };
 
-    io.emit('chat', msg);
+    io.emit('chat', chatInfo);
   });
 
   // force client disconnect from server

@@ -6,14 +6,24 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 </head>
 <body>
-  <div class="container">
-    <h3>Socket.io Chat Example</h3>
-    <form class="form-inline">
+  <div id="login">
+    <h3>유저 정보 입력</h3>
+    <form id="userInfoForm" class="form-inline">
       <div class="form-group">
-        <label for="msgForm">Message: </label>
+        <label for="userName">닉네임: </label>
+        <input type="text" class="form-control" id="userName">
+      </div>
+      <button type="submit" class="btn btn-primary">확인</button>
+    </form>
+  </div>
+  <div id="chat" style="display: none;">
+    <h3>채팅방</h3>
+    <form id="messageForm" class="form-inline">
+      <div class="form-group">
+        <label for="msgForm">메세지: </label>
         <input type="text" class="form-control" id="msgForm">
       </div>
-      <button type="submit" class="btn btn-primary">Send</button>
+      <button type="submit" class="btn btn-primary">전송</button>
     </form>
     <div id="chatLogs"></div>
   </div>
@@ -23,12 +33,20 @@
   $(function(){
     // socket.io 서버에 접속한다
     var socket = io();
+    var $userName = $("#userName");
+    var $msgForm = $("#msgForm");
 
     // 서버로 자신의 정보를 전송한다.
-    socket.emit("login", {
-      // name: "ungmo2",
-      name: makeRandomName(),
-      userid: "ungmo2@gmail.com"
+    $("#userInfoForm").submit(function(e) {
+        e.preventDefault();
+
+        socket.emit("login", {
+          name: $userName.val()
+        });
+        $userName.val("");
+
+        $("#login").hide();
+        $("#chat").show();
     });
 
     // 서버로부터의 메시지가 수신되면
@@ -38,16 +56,16 @@
 
     // 서버로부터의 메시지가 수신되면
     socket.on("chat", function(data) {
-      $("#chatLogs").append("<div><strong>[" + data.from.name + "]</strong> :" + data.msg + "</div>");
+      $("#chatLogs").append("<div><strong>[" + data.userInfo.name + "]</strong> :" + data.msg + "</div>");
     });
 
-    // Send 버튼이 클릭되면
-    $("form").submit(function(e) {
+    // 서버로 메시지를 전송한다.
+    $("#messageForm").submit(function(e) {
       e.preventDefault();
-      var $msgForm = $("#msgForm");
 
-      // 서버로 메시지를 전송한다.
-      socket.emit("chat", { msg: $msgForm.val() });
+      socket.emit("chat", {
+        msg: $msgForm.val()
+      });
       $msgForm.val("");
     });
 
