@@ -16,6 +16,20 @@
       <button type="submit" class="btn btn-primary">확인</button>
     </form>
   </div>
+  <div id="roomList" style="display: none;">
+    <h3>채팅방 목록</h3>
+    <button type="button" id="createRoom" class="btn btn-primary">채팅방 만들기</button>
+    <ul id="roomListUl">
+      <li id="noRoom">현재 채팅방이 없습니다.</li>
+    </ul>
+    <form id="createRoomForm" class="form-inline" style="display: none;">
+      <div class="form-group">
+        <label for="roomName">채팅방명: </label>
+        <input type="text" class="form-control" id="roomName">
+      </div>
+      <button type="submit" class="btn btn-primary">만들기</button>
+    </form>
+  </div>
   <div id="chat" style="display: none;">
     <h3>채팅방</h3>
     <form id="messageForm" class="form-inline">
@@ -29,55 +43,7 @@
   </div>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script>
-  $(function(){
-    // socket.io 서버에 접속한다
-    var socket = io();
-    var $userName = $("#userName");
-    var $msgForm = $("#msgForm");
+  <script src="/client.js"></script>
 
-    // 서버로 자신의 정보를 전송한다.
-    $("#userInfoForm").submit(function(e) {
-        e.preventDefault();
-
-        socket.emit("login", {
-          name: $userName.val()
-        });
-        $userName.val("");
-
-        $("#login").hide();
-        $("#chat").show();
-    });
-
-    // 서버로부터의 메시지가 수신되면
-    socket.on("login", function(data) {
-      $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 입장하였습니다.</div>");
-    });
-
-    // 서버로부터의 메시지가 수신되면
-    socket.on("chat", function(data) {
-      $("#chatLogs").append("<div><strong>[" + data.userInfo.name + "]</strong> :" + data.msg + "</div>");
-    });
-
-    // 서버로 메시지를 전송한다.
-    $("#messageForm").submit(function(e) {
-      e.preventDefault();
-
-      socket.emit("chat", {
-        msg: $msgForm.val()
-      });
-      $msgForm.val("");
-    });
-
-    function makeRandomName(){
-      var name = "";
-      var possible = "abcdefghijklmnopqrstuvwxyz";
-      for( var i = 0; i < 3; i++ ) {
-        name += possible.charAt(Math.floor(Math.random() * possible.length));
-      }
-      return name;
-    }
-  });
-  </script>
 </body>
 </html>

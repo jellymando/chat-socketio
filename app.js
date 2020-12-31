@@ -1,6 +1,9 @@
-var app = require('express')();
+var express = require('express');
+var app = express();
 var server = require('http').createServer(app);
 var io = require('socket.io')(server);
+
+app.use(express.static('public'));
 
 app.get('/', function(req, res) {
     res.sendFile(__dirname + '/index.html');
@@ -16,12 +19,17 @@ io.on('connection', function(socket) {
     socket.userid = data.userid;
 
     // 접속된 모든 클라이언트에게 메시지를 전송한다
-    io.emit('login', data.name );
+    io.emit('login', data.name);
+  });
+
+  socket.on('room', function(data) {
+    var room = socket.room = data.room;
+
+    io.emit('room', room);
   });
 
   // 클라이언트로부터의 메시지가 수신되면
   socket.on('chat', function(data) {
-
     var chatInfo = {
       userInfo: {
         name: socket.name
