@@ -3,6 +3,7 @@ $(function(){
     var socket = io();
     var $userName = $("#userName");
     var $msgForm = $("#msgForm");
+    var $roomId = 0;
     var $roomName = $("#roomName");
 
     // 서버로 자신의 정보를 전송한다.
@@ -12,7 +13,7 @@ $(function(){
         socket.emit("login", {
           name: $userName.val()
         });
-        $userName.val("");
+        // $userName.val("");
 
         $("#login").hide();
         $("#roomList").show();
@@ -27,33 +28,42 @@ $(function(){
         e.preventDefault();
 
         socket.emit("room", {
-          room: $roomName.val()
+          roomId: $roomId++,
+          roomName: $roomName.val()
         });
         $roomName.val("");
 
-        // $("#roomList").hide();
         $("#createRoomForm").hide();
-        // $("#chat").show();
     });
 
-    // 서버로부터의 메시지가 수신되면
+    $(document).on("click", ".room", function(e) {
+      e.preventDefault();
+      var roomId = $(this).attr("data-id");
+      socket.emit("join", {
+        room: roomId,
+        userName: $userName.val()
+      });
+    });
+
     socket.on("login", function(data) {
-      $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 입장하였습니다.</div>");
     });
 
-    // 서버로부터의 메시지가 수신되면
     socket.on("room", function(data) {
       console.log("room data : ", data);
       $("#noRoom").hide();
-      $("#roomListUl").append("<li>" + data + "</li>");
+      $("#roomListUl").append("<li class='room' data-id=" + data.roomId + ">" + data.roomName + "</li>");
     });
 
-    // 서버로부터의 메시지가 수신되면
+    socket.on("join", function(data) {
+        $("#roomList").hide();
+        $("#chat").show();
+        $("#chatLogs").append("<div><strong>" + data + "</strong> 님이 입장하였습니다.</div>");
+    });
+
     socket.on("chat", function(data) {
       $("#chatLogs").append("<div><strong>[" + data.userInfo.name + "]</strong> :" + data.msg + "</div>");
     });
 
-    // 서버로 메시지를 전송한다.
     $("#messageForm").submit(function(e) {
       e.preventDefault();
 
@@ -62,13 +72,4 @@ $(function(){
       });
       $msgForm.val("");
     });
-
-    function makeRandomName(){
-      var name = "";
-      var possible = "abcdefghijklmnopqrstuvwxyz";
-      for( var i = 0; i < 3; i++ ) {
-        name += possible.charAt(Math.floor(Math.random() * possible.length));
-      }
-      return name;
-    }
   });

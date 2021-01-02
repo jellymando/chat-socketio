@@ -15,7 +15,7 @@ io.on('connection', function(socket) {
     console.log('Client logged-in:\n name:' + data.name + '\n userid: ' + data.userid);
 
     // socket에 클라이언트 정보를 저장한다
-    socket.name = data.name;
+    // socket.name = data.name;
     socket.userid = data.userid;
 
     // 접속된 모든 클라이언트에게 메시지를 전송한다
@@ -23,9 +23,21 @@ io.on('connection', function(socket) {
   });
 
   socket.on('room', function(data) {
-    var room = socket.room = data.room;
+    var room = {
+      roomId: data.roomId,
+      roomName: data.roomName
+    }
 
     io.emit('room', room);
+  });
+
+  socket.on('join', function(data) {
+    socket.room = data.room;
+    socket.name = data.userName
+
+    // room에 join한다.
+    socket.join(socket.room);
+    io.emit('join', data.userName);
   });
 
   // 클라이언트로부터의 메시지가 수신되면
